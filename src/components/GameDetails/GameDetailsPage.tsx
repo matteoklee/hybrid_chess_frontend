@@ -1,10 +1,9 @@
 import React, { useRef, useState } from "react";
 
-export default function Chessboard() {
+export default function GameDetailsPage() {
     const [selectedGameId, setSelectedGameId] = useState("");
     const [gameProperties, setGameProperties] = useState<[]>([]);
 
-    let testdata = [];
     const handleGameIdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setSelectedGameId(event.target.value);
     };
@@ -24,9 +23,10 @@ export default function Chessboard() {
                 return response.json();
             })
             .then((data) => {
+                console.log("Data:")
                 console.log(data);
                 setGameProperties(data);
-                testdata = data;
+
             })
             .catch((error) => {
                 console.error("Fehler beim Abrufen der Game-Eigenschaften:", error);
@@ -34,6 +34,15 @@ export default function Chessboard() {
             });
     };
 
+    //let fetchedData = Object.entries((testdata : any[]) => {});
+    console.log("DEBUG Testdata");
+    let testdata = null;
+    if(gameProperties.length > 0) {
+        testdata = Object.entries(gameProperties);
+    }
+    console.log(testdata);
+
+    let divClass ="black";
     let div = <>
         <div>
             <h1>Game Details Page</h1>
@@ -45,14 +54,6 @@ export default function Chessboard() {
                 onChange={handleGameIdChange}
             />
             <button onClick={fetchGameProperties}>Anzeigen</button>
-
-            <div>
-                <h2>Game Details</h2>
-                <p>Game ID: {}</p>
-                <p>Game State: {}</p>
-                <p>Players: {}</p>
-                {/* Weitere Eigenschaften anzeigen */}
-            </div>
 
         </div>
     </>;

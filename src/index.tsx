@@ -4,6 +4,7 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import {Variables} from "./Types";
+import SocketManager  from "./socket";
 
 console.error("============LOADED index.tsx============");
 console.error("BEFORE GLOBAL GAME ID: " + Variables.globalGameId);
@@ -15,8 +16,9 @@ if (Variables.globalGameId < 1) {
     }).catch((error) => {
         console.log(error.message);
     })
-
 }
+
+const socketManager = new SocketManager();
 
 function createGame() {
     let create = {

@@ -5,6 +5,7 @@ import Referee from "../Referee/Referee";
 
 //npm install react-router-dom@6
 export default function Navigation() {
+
     return (
         <Router>
             <div>
