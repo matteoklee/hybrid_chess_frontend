@@ -1,8 +1,9 @@
 import './App.css';
-import Referee from './components/Referee/Referee';
 import Navigation from "./components/Navigation/Navigation";
+import React, { useEffect } from 'react';
 
 function App() {
+
     return (
         <div id="app">
             <Navigation/>

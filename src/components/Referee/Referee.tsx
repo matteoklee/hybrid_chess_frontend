@@ -6,19 +6,45 @@ import {Pawn} from "../../models/Pawn";
 import {bishopMove, kingMove, knightMove, pawnMove, queenMove, rookMove} from "../../referee/rules";
 import {PieceType, TeamType, Variables} from "../../Types";
 import Chessboard from "../Chessboard/Chessboard";
-import Navigation from "../Navigation/Navigation";
 
+var stompClient: any = null;
 export default function Referee() {
     const [board, setBoard] = useState<Board>(initialBoard.clone());
     const [promotionPawn, setPromotionPawn] = useState<Piece>();
     const modalRef = useRef<HTMLDivElement>(null);
     const checkmateModalRef = useRef<HTMLDivElement>(null);
 
+
+    /*let Sock = new SockJS("http://localhost:8080/websocket");
+    stompClient = over(Sock);
+    // @ts-ignore
+    stompClient.connect({}, onConnected, onError);
+
+
+    const onConnected = () => {
+        stompClient.subscribe("/topic/chess", onMessageReceived);
+        stompClient.subscribe("/topic/greetings", onMessageReceived);
+        socketLoaded();
+    }
+
+    const socketLoaded = () => {
+        stompClient.send("/app/hello", {}, "HELLO FROM FRONTEND");
+    }
+
+    const onMessageReceived = (payload: string) => {
+        console.log("MESSAGE RECEIVED: " + payload);
+    }
+
+    const onError = ({err}: { err: any }) => {
+        console.log(err);
+    }
+
+     */
+
     let test: any[] = [];
     console.error("REFEREE WITH GLOBAL GAME ID: " + Variables.globalGameId)
 
     function playMove(playedPiece: Piece, destination: Position): boolean {
-        console.log("DEBUG 1");
         // If the playing piece doesn't have any moves return
         if (playedPiece.possibleMoves === undefined) return false;
 
@@ -32,11 +58,7 @@ export default function Referee() {
 
         const validMove = playedPiece.possibleMoves?.some(m => m.samePosition(destination));
 
-        console.log("DEBUG 2");
-
         if (!validMove) return false;
-
-        console.log("DEBUG 3");
 
         const enPassantMove = isEnPassantMove(
             playedPiece.position,
@@ -44,8 +66,6 @@ export default function Referee() {
             playedPiece.type,
             playedPiece.team
         );
-
-        console.log("DEBUG 4");
 
         // playMove modifies the board thus we
         // need to call setBoard
@@ -64,8 +84,6 @@ export default function Referee() {
             return clonedBoard;
         })
 
-        console.log("DEBUG 5");
-
         // This is for promoting a pawn
         let promotionRow = (playedPiece.team === TeamType.OUR) ? 7 : 0;
 
@@ -77,8 +95,6 @@ export default function Referee() {
                 return clonedPlayedPiece;
             });
         }
-        console.log("DEBUG 6");
-
         /**
          * Parameter:
          * {
