@@ -248,7 +248,7 @@ export default function Referee() {
     return (
         <>
 
-            <p style={{ color: "black", fontSize: "24px", textAlign: "center" }}>Total turns: {board.totalTurns-1}</p>
+            <p style={{ color: "black", fontSize: "24px", textAlign: "center", margin: "0px", padding: "0px", marginBottom: "10px"}}>Total turns: {board.totalTurns-1}</p>
             <div className="modal hidden" ref={modalRef}>
                 <div className="modal-body">
                     <img onClick={() => promotePawn(PieceType.ROOK)} src={`/assets/images/rook_${promotionTeamType()}.png`} />

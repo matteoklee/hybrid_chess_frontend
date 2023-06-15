@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 
 export default function GameDetailsPage() {
     const [selectedGameId, setSelectedGameId] = useState("");
@@ -44,17 +44,35 @@ export default function GameDetailsPage() {
 
     let divClass ="black";
     let div = <>
-        <div>
-            <h1>Game Details Page</h1>
-            <label htmlFor="gameIdInput">Chess Game ID:</label>
-            <input
-                type="text"
-                id="gameIdInput"
-                value={selectedGameId}
-                onChange={handleGameIdChange}
-            />
-            <button onClick={fetchGameProperties}>Anzeigen</button>
+        <div className="content" style={{justifyContent: "center", alignItems: "center", textAlign: "center"}}>
+            <h1 className="title is-4">Game Archiv</h1>
 
+            <div className="field">
+                <label className="label" htmlFor="gameIdInput">Chess Game ID:</label>
+                <div className="control">
+                    <input
+                        className="input"
+                        type="text"
+                        id="gameIdInput"
+                        value={selectedGameId}
+                        onChange={handleGameIdChange}
+                        placeholder="34"
+                    />
+                </div>
+            </div>
+            <div className="field">
+                <div className="control">
+                    <button className="button is-link" onClick={fetchGameProperties}>Anzeigen</button>
+                </div>
+            </div>
+
+            <div className="content">
+                <h2 className="subtitle">Game Details</h2>
+                <p>Game ID: {}</p>
+                <p>Game State: {}</p>
+                <p>Players: {}</p>
+                {/* Weitere Eigenschaften anzeigen */}
+            </div>
         </div>
     </>;
     return div;

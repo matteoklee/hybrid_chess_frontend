@@ -5,7 +5,7 @@ import React, { useEffect } from 'react';
 function App() {
 
     return (
-        <div id="app">
+        <div id="app" className="has-background-grey-lighter">
             <Navigation/>
         </div>
     );

@@ -8,17 +8,14 @@ class SocketManager {
         const socket = new SockJS('http://localhost:8080/websocket');
         this.stompClient = Stomp.over(socket);
 
-        // Verbindung herstellen
         this.stompClient.connect({}, (frame) => {
             console.log('Verbindung hergestellt: ' + frame);
 
-            // Subscriben auf den Endpunkt für die ausgehenden Nachrichten
             this.stompClient.subscribe('/topic/greetings', (greeting) => {
                 var message = JSON.parse(greeting.body);
                 console.log('Nachricht erhalten: ' + message.content);
 
-                // REST-API-Schnittstelle aufrufen
-                // Beispiel mit fetch()
+
                 /*fetch('/api/some-endpoint', {
                     method: 'POST',
                     headers: {
@@ -29,7 +26,6 @@ class SocketManager {
                     .then(response => response.json())
                     .then(data => {
                         console.log('API-Antwort erhalten:', data);
-                        // Weitere Aktionen mit der API-Antwort durchführen
                     })
                     .catch(error => {
                         console.error('Fehler beim Aufrufen der API:', error);
@@ -42,8 +38,7 @@ class SocketManager {
                 console.error("----------------------------------------------------------");
                 console.log('Nachricht erhalten: ' + message);
                 this.stompClient.send('/app/chessInfo', {}, "WORKS");
-                // REST-API-Schnittstelle aufrufen
-                // Beispiel mit fetch()
+
                 fetch('http://localhost:8080/api/games/34', {
                     method: 'GET',
                     headers: {
@@ -53,7 +48,6 @@ class SocketManager {
                     .then(response => response.json())
                     .then(data => {
                         console.log('API-Antwort erhalten:', data);
-                        // Weitere Aktionen mit der API-Antwort durchführen
                     })
                     .catch(error => {
                         console.error('Fehler beim Aufrufen der API:', error);
@@ -61,13 +55,10 @@ class SocketManager {
                 console.log("----------------------------------------------------------");
             });
 
-            // Nachricht senden
             this.stompClient.send('/app/hello', {}, JSON.stringify({ name: 'Alice' }));
             this.stompClient.send('/app/chess', {}, "FRONTEND TO CHESS BACKEND");
         });
     }
-
-    // Weitere Methoden und Funktionen der Klasse
 
 }
 
