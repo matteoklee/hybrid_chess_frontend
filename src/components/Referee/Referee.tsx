@@ -33,7 +33,7 @@ export default function Referee() {
             console.log('Nachricht erhalten: ' + message);
             //stompClient.send('/app/chessInfo', {}, "WORKS");
 
-            fetch('http://localhost:8080/api/games/' + Variables.globalGameId, {
+            fetch('http://localhost:8080/api/moves/' + Variables.globalGameId, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
@@ -42,19 +42,32 @@ export default function Referee() {
                 .then(response => response.json())
                 .then(data => {
                     console.log('API-Antwort erhalten:', data);
+                    console.log('API-Antwort SIZE:', data.length);
+                    console.log('API-Antwort Object:', data[data.length-1]);
+                    // @ts-ignore
+                    console.log('API-Antwort newPos:', Object.entries(data)[data.length-1][1].newPos);
+                    // @ts-ignore
+                    console.log('API-Antwort previousPos:', Object.entries(data)[data.length-1][1].previousPos);
+                    // @ts-ignore
+                    console.log('API-Antwort previousPos:', Object.entries(data)[data.length-1][1].previousPos.x);
+                    //moveFromBackend = data[data.length-1];
+                    let moveFromBackend = Object.entries(data)[data.length-1][1];
+
+                    const testpiece = board.pieces.find((p) =>
+                        //p.samePosition(new Position(5, 6))
+                        // @ts-ignore
+                        p.samePosition(new Position(moveFromBackend.previousPos.x, 7-moveFromBackend.previousPos.y)) //5 6
+                    );
+                    if (testpiece instanceof Piece) {
+                        // @ts-ignore
+                        playMove(testpiece, new Position(moveFromBackend.newPos.x, 7-moveFromBackend.newPos.y), false); //5 4
+                    }
                 })
                 .catch(error => {
                     console.error('Fehler beim Aufrufen der API:', error);
                 });
             console.log(board);
 
-            const testpiece = board.pieces.find((p) =>
-                p.samePosition(new Position(5, 6))
-            );
-
-            if (testpiece instanceof Piece) {
-                playMove(testpiece, new Position(5, 4), false);
-            }
             /*
              const chessboard = chessboardRef.current;
                 if (activePiece && chessboard) {
@@ -90,6 +103,10 @@ export default function Referee() {
 
 
     function playMove(playedPiece: Piece, destination: Position, fromFrontend: boolean): boolean {
+        console.error("PLAYED MOVE: " + JSON.stringify(playedPiece));
+        console.error("PLAYED MOVE: " + JSON.stringify(destination));
+        console.error("PLAYED MOVE: " + fromFrontend);
+
         // If the playing piece doesn't have any moves return
         if (playedPiece.possibleMoves === undefined) return false;
 
@@ -123,6 +140,9 @@ export default function Referee() {
                 destination);
 
             if(clonedBoard.winningTeam !== undefined) {
+                console.log("========================================");
+                console.log("WINNING TEAM: " + clonedBoard.winningTeam);
+                console.log("========================================");
                 checkmateModalRef.current?.classList.remove("hidden");
             }
 
