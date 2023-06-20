@@ -6,45 +6,90 @@ import {Pawn} from "../../models/Pawn";
 import {bishopMove, kingMove, knightMove, pawnMove, queenMove, rookMove} from "../../referee/rules";
 import {PieceType, TeamType, Variables} from "../../Types";
 import Chessboard from "../Chessboard/Chessboard";
+// @ts-ignore
+import SockJS from 'sockjs-client';
+// @ts-ignore
+import Stomp from 'stompjs';
 
-var stompClient: any = null;
 export default function Referee() {
     const [board, setBoard] = useState<Board>(initialBoard.clone());
     const [promotionPawn, setPromotionPawn] = useState<Piece>();
     const modalRef = useRef<HTMLDivElement>(null);
     const checkmateModalRef = useRef<HTMLDivElement>(null);
 
-
-    /*let Sock = new SockJS("http://localhost:8080/websocket");
-    stompClient = over(Sock);
-    // @ts-ignore
-    stompClient.connect({}, onConnected, onError);
-
-
-    const onConnected = () => {
-        stompClient.subscribe("/topic/chess", onMessageReceived);
-        stompClient.subscribe("/topic/greetings", onMessageReceived);
-        socketLoaded();
-    }
-
-    const socketLoaded = () => {
-        stompClient.send("/app/hello", {}, "HELLO FROM FRONTEND");
-    }
-
-    const onMessageReceived = (payload: string) => {
-        console.log("MESSAGE RECEIVED: " + payload);
-    }
-
-    const onError = ({err}: { err: any }) => {
-        console.log(err);
-    }
-
-     */
-
     let test: any[] = [];
     console.error("REFEREE WITH GLOBAL GAME ID: " + Variables.globalGameId)
 
-    function playMove(playedPiece: Piece, destination: Position): boolean {
+    console.log("=============SOCKET.JS=============")
+
+    const socket = new SockJS('http://localhost:8080/websocket');
+    let stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, (frame: string) => {
+        console.log('Verbindung hergestellt: ' + frame);
+
+        stompClient.subscribe('/topic/chess', (message: string) => {
+            console.error("----------------------------------------------------------");
+            console.log('Nachricht erhalten: ' + message);
+            //stompClient.send('/app/chessInfo', {}, "WORKS");
+
+            fetch('http://localhost:8080/api/games/' + Variables.globalGameId, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }//, body: JSON.stringify({ message: message.content })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('API-Antwort erhalten:', data);
+                })
+                .catch(error => {
+                    console.error('Fehler beim Aufrufen der API:', error);
+                });
+            console.log(board);
+
+            const testpiece = board.pieces.find((p) =>
+                p.samePosition(new Position(5, 6))
+            );
+
+            if (testpiece instanceof Piece) {
+                playMove(testpiece, new Position(5, 4), false);
+            }
+            /*
+             const chessboard = chessboardRef.current;
+                if (activePiece && chessboard) {
+                  const x = Math.floor((e.clientX - chessboard.offsetLeft) / GRID_SIZE);
+                  const y = Math.abs(
+                    Math.ceil((e.clientY - chessboard.offsetTop - 800) / GRID_SIZE)
+                  );
+
+                  const currentPiece = pieces.find((p) =>
+                    p.samePosition(grabPosition)
+                  );
+                  console.log(grabPosition);
+
+                  if (currentPiece) {
+                    var succes = playMove(currentPiece.clone(), new Position(x, y));
+
+                    if(!succes) {
+                      //RESETS THE PIECE POSITION
+                      activePiece.style.position = "relative";
+                      activePiece.style.removeProperty("top");
+                      activePiece.style.removeProperty("left");
+                    }
+                  }
+                  setActivePiece(null);
+                }
+             */
+            console.log("----------------------------------------------------------");
+        });
+
+        //stompClient.send('/app/hello', {}, JSON.stringify({ name: 'Alice' }));
+        //stompClient.send('/app/chess', {}, "FRONTEND TO CHESS BACKEND");
+    });
+
+
+    function playMove(playedPiece: Piece, destination: Position, fromFrontend: boolean): boolean {
         // If the playing piece doesn't have any moves return
         if (playedPiece.possibleMoves === undefined) return false;
 
@@ -118,39 +163,50 @@ export default function Referee() {
          * @return
          */
 
-        let whoIsPlaying;
-        if(playedPiece.team == TeamType.OUR) {
-            whoIsPlaying = false;
-        } else whoIsPlaying = true;
 
-        let data = {
-            "id" : Variables.globalGameId,
-            "whoIsPlaying" : {
-                "name": (whoIsPlaying) ? "BACKEND" : "FRONTEND"
-            },
-            "move" : {
-                "previousPos": {
-                    "x": playedPiece.position.x,
-                    "y": 7-playedPiece.position.y
+        if(fromFrontend) {
+            let whoIsPlaying;
+            if(playedPiece.team === TeamType.OUR) {
+                whoIsPlaying = false;
+            } else whoIsPlaying = true;
+
+            let data = {
+                "id" : Variables.globalGameId,
+                "whoIsPlaying" : {
+                    "name": (whoIsPlaying) ? "BACKEND" : "FRONTEND"
                 },
-                "newPos": {
-                    "x": destination.x,
-                    "y": 7-destination.y
+                "move" : {
+                    "previousPos": {
+                        "x": playedPiece.position.x,
+                        "y": 7-playedPiece.position.y
+                    },
+                    "newPos": {
+                        "x": destination.x,
+                        "y": 7-destination.y
+                    }
                 }
             }
+            console.log("MOVE TEST: " + JSON.stringify(data));
+            let testerror = false;
+
+            fetch("http://localhost:8080/api/games/" + Variables.globalGameId, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data)
+            }).then(async (response) => {
+                console.log(response);
+            }).catch((error) => {
+                console.log(error.message);
+                testerror = true;
+            });
+            if(testerror) {
+                console.log("Error playMove")
+                return false;
+            }
         }
-        console.log("MOVE TEST: " + JSON.stringify(data));
-        fetch("http://localhost:8080/api/games/" + Variables.globalGameId, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data)
-        }).then(async (response) => {
-            console.log(response);
-        }).catch((error) => {
-            console.log(error.message);
-        });
+
         return playedMoveIsValid;
     }
 
@@ -248,7 +304,7 @@ export default function Referee() {
     return (
         <>
 
-            <p style={{ color: "black", fontSize: "24px", textAlign: "center", margin: "0px", padding: "0px", marginBottom: "10px"}}>Total turns: {board.totalTurns-1}</p>
+            <p style={{ color: "black", fontSize: "24px", textAlign: "center", margin: "0px", padding: "0px", marginBottom: "10px"}}>Spielzüge: {board.totalTurns-1}</p>
             <div className="modal hidden" ref={modalRef}>
                 <div className="modal-body">
                     <img onClick={() => promotePawn(PieceType.ROOK)} src={`/assets/images/rook_${promotionTeamType()}.png`} />

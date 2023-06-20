@@ -1,15 +1,12 @@
-import { useRef, useState } from "react";
+import {useRef, useState} from "react";
 import "./Chessboard.css";
 import Tile from "../Tile/Tile";
-import {
-  VERTICAL_AXIS,
-  HORIZONTAL_AXIS,
-  GRID_SIZE,
-} from "../../Constants";
-import { Piece, Position } from "../../models";
+import {GRID_SIZE, HORIZONTAL_AXIS, VERTICAL_AXIS,} from "../../Constants";
+import {Piece, Position} from "../../models";
+import {TeamType} from "../../Types";
 
 interface Props {
-  playMove: (piece: Piece, position: Position) => boolean;
+  playMove: (piece: Piece, position: Position, fromFrontend: boolean) => boolean;
   pieces: Piece[];
 }
 
@@ -21,6 +18,7 @@ export default function Chessboard({playMove, pieces} : Props) {
   function grabPiece(e: React.MouseEvent) {
     const element = e.target as HTMLElement;
     const chessboard = chessboardRef.current;
+
     if (element.classList.contains("chess-piece") && chessboard) {
       const grabX = Math.floor((e.clientX - chessboard.offsetLeft) / GRID_SIZE);
       const grabY = Math.abs(
@@ -40,6 +38,7 @@ export default function Chessboard({playMove, pieces} : Props) {
 
   function movePiece(e: React.MouseEvent) {
     const chessboard = chessboardRef.current;
+
     if (activePiece && chessboard) {
       const minX = chessboard.offsetLeft - 25;
       const minY = chessboard.offsetTop - 25;
@@ -78,6 +77,7 @@ export default function Chessboard({playMove, pieces} : Props) {
   }
 
   function dropPiece(e: React.MouseEvent) {
+    console.log("DROP PIECE");
     const chessboard = chessboardRef.current;
     if (activePiece && chessboard) {
       const x = Math.floor((e.clientX - chessboard.offsetLeft) / GRID_SIZE);
@@ -88,16 +88,25 @@ export default function Chessboard({playMove, pieces} : Props) {
       const currentPiece = pieces.find((p) =>
         p.samePosition(grabPosition)
       );
+      console.log(grabPosition);
 
       if (currentPiece) {
-        var succes = playMove(currentPiece.clone(), new Position(x, y));
-
-        if(!succes) {
-          //RESETS THE PIECE POSITION
+        if(currentPiece.team == TeamType.OPPONENT) {
           activePiece.style.position = "relative";
           activePiece.style.removeProperty("top");
           activePiece.style.removeProperty("left");
+          console.log("ONLY BACKEND CAN PLAY TEAM BLACK")
+        } else {
+          var succes = playMove(currentPiece.clone(), new Position(x, y), true);
+
+          if(!succes) {
+            //RESETS THE PIECE POSITION
+            activePiece.style.position = "relative";
+            activePiece.style.removeProperty("top");
+            activePiece.style.removeProperty("left");
+          }
         }
+
       }
       setActivePiece(null);
     }

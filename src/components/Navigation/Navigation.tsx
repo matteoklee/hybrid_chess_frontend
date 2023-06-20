@@ -11,8 +11,8 @@ export default function Navigation() {
     return (
         <Router>
             <div>
-                <nav>
-                    <ul style={{display: "flex", listStyleType: "none"}}>
+                <nav style={{textAlign: "center",  marginLeft: "auto", marginRight: "auto"}}>
+                    <ul style={{display: "flex", listStyleType: "none", marginLeft: "auto", marginRight: "auto"}}>
                         <li style={{ marginRight: "12px"}}>
                             <Link to="/">Home</Link>
                         </li>
